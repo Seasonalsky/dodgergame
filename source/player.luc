@@ -1,0 +1,76 @@
+module player
+  (
+    input clk,  // clock
+    input rst,  // reset
+    input up,
+    input down,
+    input left,
+    input right,
+    input proj[60],
+    //output health[2], // 1-4 health
+    output coor[6], // 3bits of x 0-7 where 7 is
+    output gameend
+  ) {
+  
+  .clk(clk) {
+    edge_detector edUp(#RISE(1), #FALL(0)); // detect rising edges
+    edge_detector edDown(#RISE(1), #FALL(0)); // detect rising edges
+    edge_detector edLeft(#RISE(1), #FALL(0)); // detect rising edges
+    edge_detector edRight(#RISE(1), #FALL(0)); // detect rising edges
+    
+    button_conditioner bcUp;     // button input conditioner
+    button_conditioner bcDown;     // button input reset_conditioner
+    button_conditioner bcLeft;     // button input reset_conditioner
+    button_conditioner bcRight; // button input conditioner
+    customCounter counter(.rst(rst));
+    
+    dff storeCoor[6](.rst(rst));
+    // dff cooldown[22];
+  }
+  
+
+    sig newCoor[6];
+  
+  always {
+    coor = storeCoor.q;
+    gameend = 0;
+    counter.amount = 10000000;
+    counter.resetCd = 0;
+    
+    bcUp.in = up;
+    bcDown.in = down;
+    bcLeft.in = left;
+    bcRight.in = right;
+    
+    edUp.in = bcUp.out;
+    edDown.in = bcDown.out;
+    edLeft.in = bcLeft.out;
+    edRight.in = bcRight.out;
+    
+    
+    // Create variable name newx, newy that is used to check for conditions
+    
+    newCoor = 0;
+    
+    if (counter.ans == 1){
+      // Movement to update position
+      if(edUp.out)
+        newCoor = storeCoor.q - 6;
+      else if(edDown.out)
+        newCoor = storeCoor.q + 6;
+      else if(edLeft.out)
+        newCoor = storeCoor.q - 1;
+      else if(edRight.out)
+        newCoor = storeCoor.q + 1;
+        
+      counter.resetCd = 1;
+    }
+
+  gameend = 0;
+  if (proj[storeCoor.q]==1)
+    gameend = 1;
+  if(rst){
+    storeCoor.d = 0;
+  }
+}
+}

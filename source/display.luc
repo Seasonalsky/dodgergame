@@ -1,0 +1,32 @@
+module display (
+    input clk, //clock
+    input rst, //reset
+    input mapArr[66][24],
+    output datalines
+  )
+  {
+
+  dff counter[23](.clk(clk), .rst(rst)); 
+  sig ledNo[7];
+  sig foo[13];
+
+  
+  always {
+    counter.d = counter.q + 1;
+    datalines = 0;
+    
+    ledNo = counter.q / (64*24);
+    foo = counter.q - ((counter.q/(64*24))*(64*24));
+    
+    if (counter.q < 64*24*66) {
+    
+      if (mapArr[ledNo][23-(foo>>6)] == 0) {
+        if (foo[5:0] < 20) datalines = 1; //corresponds to Th of logic bit 0
+      }
+      else {
+        if (foo[5:0] < 40) datalines = 1; //corresponds to Th of logic bit 1
+      }
+    }
+   
+  }
+}

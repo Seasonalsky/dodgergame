@@ -1,0 +1,33 @@
+module projectiles (
+    input clk,  // clock
+    input rst,  // reset
+    output coor[60] // 7bits of y 1 hot encoding
+    //output gameend
+  ) {
+  
+  .clk(clk) {
+    
+    edge_detector edUpd[4](#RISE(1), #FALL(0));
+    
+    dff storeCoor[60](.rst(rst));
+    dff upd[23](.rst(rst));
+    
+  }
+  // instantiate i for counting
+  //sig i;
+  
+  always {
+    edUpd.in = upd.q[22];
+    
+    if(edUpd.out == 1){
+        //storex.d[i] = storex.q[i];
+        storeCoor.d = storeCoor.q >> 6;//shifter 
+      
+    }
+    
+    
+    // Set to update the output to be the output calculated
+    coor = storeCoor.q;
+    
+  }
+}
